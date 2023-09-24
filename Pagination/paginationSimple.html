@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Pagination with jQuery and JS</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <style>
+      .center {
+        margin: auto;
+        width: 80%;
+        padding: 10px;
+        text-align: center; /* Menambahkan styling agar konten berada di tengah */
+      }
+
+      table,
+      th,
+      td {
+        border: 1px solid black;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 15px;
+      }
+
+      .paging {
+        text-align: center;
+        margin-top: 10px; /* Menambahkan margin atas pada elemen paging */
+      }
+
+      ul.pagination {
+        display: inline-block;
+        padding: 0;
+        margin: 0;
+      }
+
+      ul.pagination li {
+        display: inline;
+      }
+
+      ul.pagination li a {
+        color: black;
+        float: left;
+        padding: 8px 16px;
+        text-decoration: none;
+        transition: background-color 0.3s;
+      }
+
+      ul.pagination li a.active {
+        background-color: #4caf50;
+        color: white;
+      }
+
+      ul.pagination li a:hover:not(.active) {
+        background-color: #ddd;
+      }
+
+      .pagination a {
+        border: 1px solid #ddd;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="center">
+      <h3>Pagination using Javascript, JQuery, HTML and CSS</h3>
+      <div class="pageDropdown">
+        <label>Records per page:</label>
+        <select class="recordsPerPage">
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="8">8</option>
+          <option value="12">12</option>
+          <option value="20">20</option>
+        </select>
+      </div>
+      <br />
+      <div>
+        <table id="personTable">
+          <tr>
+            <th>Name</th>
+            <th>Gender</th>
+            <th>Age</th>
+          </tr>
+          <tbody id="personTabBody"></tbody>
+        </table>
+      </div>
+      <div class="paging">
+        <ul class="pagination" id="pageList"></ul>
+      </div>
+
+      <!-- Tambahkan elemen HTML berikut -->
+      <div class="page-info">
+        <span>Page: </span>
+        <span id="currentPage">1</span>
+        <span> of </span>
+        <span id="totalPages">1</span>
+      </div>
+    </div>
+
+    <script>
+      $(document).ready(function () {
+        var personData; // data to be retrieved from the json file
+        var recordsPerPage = 5;
+        var currentPage = 1;
+        var totalRecords;
+
+        $.getJSON('persons.json', function (data) {
+          personData = data;
+          totalRecords = personData.length;
+          updatePagination();
+          displayTable(currentPage);
+        });
+
+        $('#personTable').hide();
+
+        function displayTable(pageNum) {
+          var startIndex = (pageNum - 1) * recordsPerPage;
+          var endIndex = startIndex + recordsPerPage;
+          var pageWisePersonData = personData.slice(startIndex, endIndex);
+          var html = '';
+          for (var i = 0; i < pageWisePersonData.length; i++) {
+            html += '<tr>';
+            html += '<td>' + pageWisePersonData[i].name + '</td>';
+            html += '<td>' + pageWisePersonData[i].gender + '</td>';
+            html += '<td>' + pageWisePersonData[i].age + '</td>';
+            html += '</tr>';
+          }
+          $('#personTabBody').html(html);
+          $('#personTable').show();
+          $('#currentPage').text(pageNum); // Update nomor halaman saat ini
+        }
+
+        function updatePagination() {
+          var totalPages = Math.ceil(totalRecords / recordsPerPage);
+          var list = '';
+          for (var i = 1; i <= totalPages; i++) {
+            list += '<li><a href="#">' + i + '</a></li>';
+          }
+          $('#pageList').html(list);
+          $('ul.pagination li a').removeClass('active');
+          $('ul.pagination li:nth-child(' + currentPage + ') a').addClass('active');
+          $('#totalPages').text(totalPages); // Update jumlah halaman total
+        }
+
+        $('ul.pagination').on('click', 'li', function (e) {
+          var pageNum = parseInt($(e.target).text());
+          currentPage = pageNum;
+          updatePagination();
+          displayTable(currentPage);
+        });
+
+        $('.recordsPerPage').change(function () {
+          recordsPerPage = parseInt($(this).val());
+          currentPage = 1;
+          updatePagination();
+          displayTable(currentPage);
+        });
+      });
+    </script>
+  </body>
+</html>
